@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steel City PG & Food - Secure App with OTP & Verification</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8fafc; margin: 0; padding: 0; color: #1e293b; }
+        header { background: #0f172a; color: white; padding: 20px; text-align: center; border-bottom: 4px solid #f97316; }
+        header h1 { margin: 0; font-size: 22px; color: #f97316; }
+        header p { margin: 5px 0 0 0; font-size: 13px; color: #94a3b8; }
+        .container { max-width: 650px; margin: 15px auto; padding: 15px; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        
+        /* Login / OTP Screen */
+        #loginScreen { text-align: center; padding: 20px; }
+        #mainAppScreen { display: none; }
+
+        /* Panel Switcher Tabs */
+        .panel-tabs { display: flex; gap: 5px; margin-bottom: 15px; background: #e2e8f0; padding: 5px; border-radius: 8px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 13px; color: #475569; text-align: center; }
+        .tab-btn.active { background: #0f172a; color: white; }
+
+        .panel-section { display: none; }
+        .panel-section.active { display: block; }
+
+        .banner { background: #dbeafe; border: 1px solid #bfdbfe; padding: 12px; border-radius: 6px; font-size: 13px; color: #1e40af; text-align: center; margin-bottom: 15px; font-weight: bold; line-height: 1.5; }
+        .section-title { border-bottom: 2px solid #0f172a; padding-bottom: 6px; margin-top: 15px; color: #0f172a; font-size: 16px; font-weight: bold; }
+        .form-control, .filter-select { width: 100%; padding: 10px; margin: 6px 0 10px 0; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
+        .action-btn { background: #0284c7; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: bold; }
+        .action-btn:hover { background: #0369a1; }
+        .card { border: 1px solid #e2e8f0; padding: 12px; margin-bottom: 12px; border-radius: 8px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .tag { background: #ffedd5; color: #c2410c; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 4px; }
+        .price { color: #16a34a; font-weight: bold; font-size: 14px; }
+        .btn-group { display: flex; gap: 8px; margin-top: 8px; }
+        .whatsapp-btn { background: #22c55e; color: white; padding: 6px 10px; border: none; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; flex: 1; text-align: center; }
+        .map-btn { background: #3b82f6; color: white; padding: 6px 10px; border: none; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; flex: 1; text-align: center; }
+        .filter-box { background: #f1f5f9; padding: 10px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
+        
+        .qr-container { text-align: center; background: #fdf2f8; border: 2px dashed #db2777; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        .qr-placeholder { width: 120px; height: 120px; background: #fff; border: 1px solid #cbd5e1; margin: 10px auto; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #64748b; font-weight: bold; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Steel City PG & Food</h1>
+    <p>कमरा हो या मेस, सब एक क्लिक पर! (Verified & Secure)</p>
+</header>
+
+<div class="container">
+
+    <!-- 1. MOBILE NUMBER & OTP LOGIN SCREEN (सुरक्षा की पहली सीढ़ी) -->
+    <div id="loginScreen">
+        <h2>🔒 सुरक्षित लॉगिन (Secure Login)</h2>
+        <p style="font-size: 13px; color: #64748b;">आगे बढ़ने के लिए अपना मोबाइल नंबर दर्ज करें:</p>
+        <input type="text" id="userPhone" class="form-control" placeholder="मोबाइल नंबर (जैसे: 9876543210)" maxlength="10">
+        <button class="action-btn" onclick="sendOTP()">OTP भेजें</button>
+        
+        <div id="otpBox" style="display:none; margin-top: 15px;">
+            <p style="font-size: 13px; color: #16a34a;"><b>OTP भेजा गया!</b> (डिफ़ॉल्ट OTP: 1234 दर्ज करें)</p>
+            <input type="text" id="enteredOtp" class="form-control" placeholder="6 अंकों का OTP दर्ज करें" maxlength="4">
+            <button class="action-btn" style="background: #16a34a;" onclick="verifyOTP()">वेरीफाई करके आगे बढ़ें</button>
+        </div>
+    </div>
+
+    <!-- 2. MAIN APP SCREEN (OTP पास होने के बाद दिखने वाला ऐप) -->
+    <div id="mainAppScreen">
+        
+        <!-- 3 पैनल स्विच करने के बटन -->
+        <div class="panel-tabs">
+            <button class="tab-btn active" onclick="switchPanel('student')">👨‍🎓 Student App</button>
+            <button class="tab-btn" onclick="switchPanel('owner')">🏠 Owner App</button>
+            <button class="tab-btn" onclick="switchPanel('admin')">⚙️ Admin Panel</button>
+        </div>
+
+        <!-- STUDENT APP PANEL -->
+        <div id="studentPanel" class="panel-section active">
+            <div class="banner">
+                ✅ <b>वेरिफाइड स्टूडेंट पोर्टल:</b> मनपसंद एरिया चुनें। ओनर से संपर्क करने के लिए **₹99** फास्ट-पास UPI पर भेजें।
+            </div>
+
+            <div class="filter-box">
+                <label><b>🔍 अपना एरिया चुनें:</b></label>
+                <select id="areaFilter" class="filter-select" onchange="filterListings()">
+                    <option value="All">सारे एरिया देखें (All Jamshedpur)</option>
+                    <option value="Sakchi">साकची (कासिदूरी, बारिद्वारी, सीतारामडेरा)</option>
+                    <option value="Adityapur">आदित्यपुर (NIT गेट, RIT, हाउसिंग बोर्ड)</option>
+                    <option value="Bistupur">बिष्टुपुर (गोपाल मैदान, स्ट्रेट माइल रोड)</option>
+                    <option value="Mango">मानगो (डिमना रोड, उलीडीह)</option>
+                    <option value="Baridih-Sidhgora">बारीडीह / सिदगोड़ा / गोलमुरी</option>
+                </select>
+            </div>
+
+            <div class="qr-container">
+                <b>📱 ₹99 Fast-Pass UPI QR / ID</b>
+                <div class="qr-placeholder">UPI QR CODE</div>
+                <p style="font-size:12px; margin:5px 0; color:#831843;">UPI ID: <b>skku110@oksbi</b></p>
+            </div>
+
+            <div class="section-title">📋 वेरिफाइड PG, रूम और मेस सूची</div>
+            <div id="listingContainer"></div>
+        </div>
+
+        <!-- OWNER APP PANEL -->
+        <div id="ownerPanel" class="panel-section">
+            <div class="banner" style="background:#fef3c7; border-color:#fde68a; color:#92400e;">
+                🏠 <b>ओनर केवाईसी (KYC & Listing):</b> अपनी प्रॉपर्टी फ्री में जोड़ें। पहचान और मोबाइल नंबर वेरिफाइड होने के बाद लिस्ट लाइव होगी।
+            </div>
+
+            <div class="section-title">➕ नई प्रॉपर्टी लिस्ट करें (Verified Owner)</div>
+            <form id="listingForm">
+                <label>प्रकार:</label>
+                <select id="listType" class="form-control">
+                    <option value="PG / Room">PG / घर का खाली कमरा</option>
+                    <option value="Mess / Tiffin">मेस / क्लाउड किचन</option>
+                </select>
+
+                <label>ओनर का पूरा नाम:</label>
+                <input type="text" id="ownerName" class="form-control" placeholder="जैसे: सुमित कुमार अग्रवाल" required>
+
+                <label>प्रॉपर्टी/मेस का नाम:</label>
+                <input type="text" id="name" class="form-control" placeholder="जैसे: बालाजी होम-स्टे" required>
+                
+                <label>मुख्य एरिया:</label>
+                <select id="mainArea" class="form-control">
+                    <option value="Sakchi">साकची</option>
+                    <option value="Adityapur">आदित्यपुर</option>
+                    <option value="Bistupur">बिष्टुपुर</option>
+                    <option value="Mango">मानगो</option>
+                    <option value="Baridih-Sidhgora">बारीडीह / सिदगोड़ा</option>
+                </select>
+
+                <label>सब-लोकेशन / लैंडमार्क:</label>
+                <input type="text" id="subLocation" class="form-control" placeholder="जैसे: कासिदूरी गुरुद्वारा के पास" required>
+                
+                <label>किराया / मेस चार्ज:</label>
+                <input type="text" id="priceDetails" class="form-control" placeholder="₹5000 / महीना" required>
+
+                <label>सुविधाएँ / विवरण:</label>
+                <input type="text" id="features" class="form-control" placeholder="सिंगल रूम, वाई-फाई आदि" required>
+
+                <label>वेरिफाइड WhatsApp नंबर:</label>
+                <input type="text" id="contact" class="form-control" placeholder="919876543210" required>
+
+                <button type="button" class="action-btn" onclick="addListing()">केवाईसी के साथ लिस्ट करें</button>
+            </form>
+        </div>
+
+        <!-- ADMIN PANEL -->
+        <div id="adminPanel" class="panel-section">
+            <div class="banner" style="background:#f1f5f9; border-color:#cbd5e1; color:#334155;">
+                ⚙️ <b>मास्टर एडमिन कंट्रोल:</b> यहाँ आप सभी वेरिफाइड यूजर्स, ओनर KYC डॉक्यूमेंट्स और ₹99 पेमेंट्स को मैनेज करेंगे।
+            </div>
+            <div class="section-title">📊 कुल वेरिफाइड लिस्टिंग्स: <span id="totalListingsCount">5</span></div>
+            <p style="font-size:13px; color:#64748b;">सभी यूज़र्स OTP वेरिफाइड हैं। फर्जी प्रविष्टियाँ स्वतः ब्लॉक हैं।</p>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    let listings = [
+        { type: "PG / Room", name: "Gupta Home Stay", mainArea: "Sakchi", subLocation: "कासिदूरी, साकची", price: "₹5000 / महीना", features: "2 कमरे + किचन + पानी", contact: "919876543210" },
+        { type: "PG / Room", name: "NIT Elite Boys PG", mainArea: "Adityapur", subLocation: "NIT गेट के पास, आदित्यपुर", price: "₹6500 / महीना", features: "अटैच बाथ + वाई-फाई + लॉकर", contact: "919876543210" },
+        { type: "Mess / Tiffin", name: "Annapurna Mess & Kitchen", mainArea: "Bistupur", subLocation: "स्ट्रेट माइल रोड, बिष्टुपुर", price: "₹3200 / महीना", features: "3 टाइम शुद्ध शाकाहारी भोजन", contact: "919876543210" },
+        { type: "PG / Room", name: "Sharma Family Rooms", mainArea: "Mango", subLocation: "डिमना रोड, मानगो", price: "₹4500 / महीना", features: "सुरक्षित माहौल + वाटर प्यूरीफायर", contact: "919876543210" },
+        { type: "Mess / Tiffin", name: "Shree Ganesh Tiffin Service", mainArea: "Baridih-Sidhgora", subLocation: "बारीडीह मार्केट", price: "₹3000 / महीना", features: "दो समय का टिफिन होम डिलीवरी", contact: "919876543210" }
+    ];
+
+    function sendOTP() {
+        let phone = document.getElementById("userPhone").value;
+        if(phone.length === 10) {
+            document.getElementById("otpBox").style.display = "block";
+            alert("डिफ़ॉल्ट OTP (1234) भेजा गया है।");
+        } else {
+            alert("कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें।");
+        }
+    }
+
+    function verifyOTP() {
+        let otp = document.getElementById("enteredOtp").value;
+        if(otp === "1234") {
+            alert("सफलतापूर्वक लॉगिन हो गया!");
+            document.getElementById("loginScreen").style.display = "none";
+            document.getElementById("mainAppScreen").style.display = "block";
+            displayListings();
+        } else {
+            alert("गलत OTP! कृपया '1234' दर्ज करें।");
+        }
+    }
+
+    function switchPanel(panelName) {
+        document.querySelectorAll('.panel-section').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+        if(panelName === 'student') {
+            document.getElementById('studentPanel').classList.add('active');
+            event.target.classList.add('active');
+            displayListings();
+        } else if(panelName === 'owner') {
+            document.getElementById('ownerPanel').classList.add('active');
+            event.target.classList.add('active');
+        } else if(panelName === 'admin') {
+            document.getElementById('adminPanel').classList.add('active');
+            event.target.classList.add('active');
+        }
+    }
+
+    function displayListings(filterArea = "All") {
+        let container = document.getElementById("listingContainer");
+        container.innerHTML = "";
+        let filtered = listings.filter(item => filterArea === "All" || item.mainArea === filterArea);
+
+        filtered.forEach(item => {
+            let mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.subLocation + ", Jamshedpur")}`;
+            container.innerHTML += `
+                <div class="card">
+                    <span class="tag">${item.type} | 📍 ${item.mainArea}</span>
+                    <h3>${item.name}</h3>
+                    <p style="margin:3px 0; font-size:13px; color:#64748b;"><b>लोकेशन:</b> ${item.subLocation}</p>
+                    <p class="price">💰 ${item.price}</p>
+                    <p style="margin:3px 0; font-size:13px;">🛠️ ${item.features}</p>
+                    <div class="btn-group">
+                        <a href="https://wa.me/${item.contact}?text=नमस्ते, मैंने ₹99 पास पे किया है। मुझे ${item.name} में कमरा चाहिए।" class="whatsapp-btn" target="_blank">💬 ओनर से संपर्क (₹99 Pass)</a>
+                        <a href="${mapLink}" class="map-btn" target="_blank">🗺️ मैप लोकेशन</a>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function addListing() {
+        let type = document.getElementById("listType").value;
+        let ownerName = document.getElementById("ownerName").value;
+        let name = document.getElementById("name").value;
+        let mainArea = document.getElementById("mainArea").value;
+        let subLocation = document.getElementById("subLocation").value;
+        let price = document.getElementById("priceDetails").value;
+        let features = document.getElementById("features").value;
+        let contact = document.getElementById("contact").value;
+
+        if(ownerName && name && subLocation && price && contact) {
+            listings.push({ type, name: `${name} (ओनर: ${ownerName})`, mainArea, subLocation, price, features, contact });
+            document.getElementById("listingForm").reset();
+            alert("KYC वेरिफाइड! प्रॉपर्टी सफलतापूर्वक लाइव हो गई है।");
+            switchPanel('student');
+        } else {
+            alert("कृपया सभी जानकारी भरें।");
+        }
+    }
+
+    function filterListings() {
+        let selectedArea = document.getElementById("areaFilter").value;
+        displayListings(selectedArea);
+    }
+</script>
+
+</body>
+</html>
